@@ -51,9 +51,10 @@ class LocationData:
         return self.forecast
 
     def get_forecastHourly(self):
+        # TODO how to get lightning data? had trouble finding in docs:
+        # * https://www.weather.gov/documentation/services-web-api#/default/gridpoint_forecast_hourly
         if not self.forecastHourly:
             self.forecastHourly = make_request(self.forecastHourlyUrl)
-            # TODO - clean
         return self.forecastHourly
 
 
