@@ -84,7 +84,7 @@ for k, v in metadata.items():
     output[k]['lat'] = v.lat
     output[k]['long'] = v.long
     output[k]['forecast'] = v.get_forecast()
-    output[k]['forecastHourly'] = v.get_forecastHourly()
+    # output[k]['forecastHourly'] = v.get_forecastHourly()
 
 # first, just print to a file
 with open('output.json', 'w') as fp:
