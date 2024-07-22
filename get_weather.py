@@ -1,22 +1,44 @@
 import json
 import requests
 
+def make_request(url):
+    try:
+        # Make a GET request to the API endpoint using requests.get()
+        response = requests.get(url)
+
+        # Check if the request was successful (status code 200)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print('issue getting metadata for point: ' + name)
+            print('Error:', response.status_code)
+            raise Exception()
+    except Exception as e:
+        print('exception when getting metdata, e is:')
+        print(e)
+
 # define the data structure for the stuff we need
 class LocationData:
-    def __init__(self, name, forecastUrl, forecastHourlyUrl):
+    def __init__(self, name, lat, long, forecastUrl, forecastHourlyUrl):
         self.name = name
+        self.lat = lat
+        self.long = long
         self.forecastUrl = forecastUrl
         self.forecastHourlyUrl = forecastHourlyUrl
+        self.forecast = False
+        self.forecastHourly = False
 
     def get_forecast(self):
-        print('todo')
-        # if self.forecast is undefined, fetch it
-        # return self.forecast
+        if not self.forecast:
+            self.forecast = make_request(self.forecastUrl)
+            # TODO - clean
+        return self.forecast
 
     def get_forecastHourly(self):
-        print('todo')
-        # if self.forecastHourly is undefined, fetch it
-        # return self.forecastHourly
+        if not self.forecastHourly:
+            self.forecastHourly = make_request(self.forecastHourlyUrl)
+            # TODO - clean
+        return self.forecastHourly
 
 
 # read in file for points
@@ -31,29 +53,21 @@ for location in input['locations']:
     long = location['long']
 
     url = base_url + str(lat) + ',' + str(long)
+    response_json = make_request(url)
 
-    try:
-        # Make a GET request to the API endpoint using requests.get()
-        response = requests.get(url)
+    forecastUrl = response_json['properties']['forecast']
+    forecastHourlyUrl = response_json['properties']['forecastHourly']
+    metadata[name] = LocationData(name, forecastUrl, forecastHourlyUrl)
 
-        # Check if the request was successful (status code 200)
-        if response.status_code == 200:
-            forecastUrl = response.json()['properties']['forecast']
-            forecastHourlyUrl = response.json()['properties']['forecastHourly']
-            metadata[name] = LocationData(name, forecastUrl, forecastHourlyUrl)
-        else:
-            print('issue getting metadata for point: ' + name)
-            print('Error:', response.status_code)
-    except Exception as e:
-        print('exception when getting metdata, e is:')
-        print(e)
-
-print('metadata is:')
-print(metadata)
-
-for k, v in metadata:
-    v.get_forecast()
-    v.get_forecastHourly()
+output = {}
+for k, v in metadata.items():
+    output[k] = {}
+    output[k]['lat'] = v.lat
+    output[k]['long'] = v.long
+    output[k]['forecast'] = v.get_forecast()
+    output[k]['forecastHourly'] = v.get_forecastHourly()
 
 # for now, just print to a file
-
+with open('output.json', 'w') as fp:
+    # TODO format
+    json.dump(output, fp)
