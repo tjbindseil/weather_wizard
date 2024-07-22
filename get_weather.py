@@ -1,3 +1,5 @@
+from dominate import document
+from dominate.tags import *
 import json
 import requests
 
@@ -84,6 +86,42 @@ for k, v in metadata.items():
     output[k]['forecast'] = v.get_forecast()
     output[k]['forecastHourly'] = v.get_forecastHourly()
 
-# for now, just print to a file
+# first, just print to a file
 with open('output.json', 'w') as fp:
     json.dump(output, fp, indent=2)
+
+# Then, print detailedforecast to a table
+# basically,
+# each location is a row,
+# each time slot is a column
+
+# kind of a hack to get the time periods
+time_periods = []
+for k, v in metadata.items():
+    for period in v.forecast['periods']:
+        time_periods.append(period['name'])
+    break # break after one iteration, we just want the names of the periods
+
+with document(title='forecast') as doc:
+    h1('forecast')
+    with table() as t:
+        # header
+        r_header = tr()
+        with r_header:
+            r_header.add(th('Location Name'))
+            for time_period in time_periods:
+                r_header.add(th(time_period))
+        t.add(r_header)
+
+        for k, v in metadata.items():
+            r_curr = tr()
+            # add name
+            r_curr.add(td(k))
+            # add detailedForecast for each time period
+            with r_curr:
+                for period in v.forecast['periods']:
+                    r_curr.add(td(period['detailedForecast']))
+            t.add(r_curr)
+
+with open('forecast.html', 'w') as f:
+    f.write(doc.render())
