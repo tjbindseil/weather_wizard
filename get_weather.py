@@ -30,8 +30,24 @@ class LocationData:
 
     def get_forecast(self):
         if not self.forecast:
-            self.forecast = make_request(self.forecastUrl)
-            # TODO - clean
+            cleaned_forecast = {}
+            full_forecast = make_request(self.forecastUrl)
+
+            cleaned_forecast['elevation'] = full_forecast['properties']['elevation']
+            cleaned_forecast['periods'] = []
+            for period in full_forecast['properties']['periods']:
+                cleaned_period = {}
+                cleaned_period['name'] = period['name']
+                cleaned_period['temperature'] = period['temperature']
+                cleaned_period['temperatureUnit'] = period['temperatureUnit']
+                cleaned_period['probabilityOfPrecipitation'] = period['probabilityOfPrecipitation']
+                cleaned_period['windSpeed'] = period['windSpeed']
+                cleaned_period['windDirection'] = period['windDirection']
+                cleaned_period['shortForecast'] = period['shortForecast']
+                cleaned_period['detailedForecast'] = period['detailedForecast']
+
+                cleaned_forecast['periods'].append(cleaned_period)
+            self.forecast = cleaned_forecast
         return self.forecast
 
     def get_forecastHourly(self):
@@ -57,7 +73,7 @@ for location in input['locations']:
 
     forecastUrl = response_json['properties']['forecast']
     forecastHourlyUrl = response_json['properties']['forecastHourly']
-    metadata[name] = LocationData(name, forecastUrl, forecastHourlyUrl)
+    metadata[name] = LocationData(name, lat, long, forecastUrl, forecastHourlyUrl)
 
 output = {}
 for k, v in metadata.items():
@@ -69,5 +85,4 @@ for k, v in metadata.items():
 
 # for now, just print to a file
 with open('output.json', 'w') as fp:
-    # TODO format
-    json.dump(output, fp)
+    json.dump(output, fp, indent=2)
