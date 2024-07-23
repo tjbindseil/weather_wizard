@@ -19,6 +19,10 @@ def make_request(url):
         print('exception when getting metdata, e is:')
         print(e)
 
+# def get_png_url(url):
+#     response = make_request(url)
+#     return response.
+
 # define the data structure for the stuff we need
 class LocationData:
     def __init__(self, name, lat, long, forecastUrl, forecastHourlyUrl):
@@ -47,6 +51,7 @@ class LocationData:
                 cleaned_period['windDirection'] = period['windDirection']
                 cleaned_period['shortForecast'] = period['shortForecast']
                 cleaned_period['detailedForecast'] = period['detailedForecast']
+                cleaned_period['icon'] = period['icon']
 
                 cleaned_forecast['periods'].append(cleaned_period)
             self.forecast = cleaned_forecast
@@ -102,7 +107,7 @@ for k, v in metadata.items():
         time_periods.append(period['name'])
     break # break after one iteration, we just want the names of the periods
 
-with document(title='forecast') as doc:
+with document(title='forecast') as doc_detailedForecast:
     h1('forecast')
     with table() as t:
         # header
@@ -123,5 +128,12 @@ with document(title='forecast') as doc:
                     r_curr.add(td(period['detailedForecast']))
             t.add(r_curr)
 
-with open('forecast.html', 'w') as f:
-    f.write(doc.render())
+        # add row with icon to see what it looks like
+        r_icon = tr()
+        r_icon.add(td(img(src='https://api.weather.gov/icons/land/day/tsra_hi,30?size=medium')))
+
+        # https://api.weather.gov/icons/land/day/tsra_hi,30?size=medium
+        t.add(r_icon)
+
+with open('forecast_detailed.html', 'w') as f:
+    f.write(doc_detailedForecast.render())
