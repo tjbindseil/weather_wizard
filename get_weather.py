@@ -19,10 +19,6 @@ def make_request(url):
         print('exception when getting metdata, e is:')
         print(e)
 
-# def get_png_url(url):
-#     response = make_request(url)
-#     return response.
-
 # define the data structure for the stuff we need
 class LocationData:
     def __init__(self, name, lat, long, forecastUrl, forecastHourlyUrl):
@@ -95,11 +91,6 @@ for k, v in metadata.items():
 with open('output.json', 'w') as fp:
     json.dump(output, fp, indent=2)
 
-# Then, print detailedforecast to a table
-# basically,
-# each location is a row,
-# each time slot is a column
-
 # kind of a hack to get the time periods
 time_periods = []
 for k, v in metadata.items():
@@ -107,33 +98,34 @@ for k, v in metadata.items():
         time_periods.append(period['name'])
     break # break after one iteration, we just want the names of the periods
 
-with document(title='forecast') as doc_detailedForecast:
-    h1('forecast')
-    with table() as t:
-        # header
-        r_header = tr()
-        with r_header:
-            r_header.add(th('Location Name'))
-            for time_period in time_periods:
-                r_header.add(th(time_period))
-        t.add(r_header)
+def make_table(metadata, key, tableName):
+    with document(title=tableName) as doc_detailedForecast:
+        h1(tableName)
+        with table() as t:
+            # header
+            r_header = tr()
+            with r_header:
+                r_header.add(th('Location Name'))
+                for time_period in time_periods:
+                    r_header.add(th(time_period))
+            t.add(r_header)
 
-        for k, v in metadata.items():
-            r_curr = tr()
-            # add name
-            r_curr.add(td(k))
-            # add detailedForecast for each time period
-            with r_curr:
-                for period in v.forecast['periods']:
-                    r_curr.add(td(period['detailedForecast']))
-            t.add(r_curr)
+            for k, v in metadata.items():
+                r_curr = tr()
+                # add name
+                r_curr.add(td(k))
+                # add detailedForecast for each time period
+                with r_curr:
+                    for period in v.forecast['periods']:
+                        r_curr.add(td(period[key]))
+                t.add(r_curr)
 
-        # add row with icon to see what it looks like
-        r_icon = tr()
-        r_icon.add(td(img(src='https://api.weather.gov/icons/land/day/tsra_hi,30?size=medium')))
+    with open('forecast_detailed.html', 'w') as f:
+        f.write(doc_detailedForecast.render())
 
-        # https://api.weather.gov/icons/land/day/tsra_hi,30?size=medium
-        t.add(r_icon)
+make_table(metadata, 'detailedForecast', 'DetailedForecast')
 
-with open('forecast_detailed.html', 'w') as f:
-    f.write(doc_detailedForecast.render())
+# # add row with icon to see what it looks like
+# r_icon = tr()
+# r_icon.add(td(img(src='https://api.weather.gov/icons/land/day/tsra_hi,30?size=medium')))
+# t.add(r_icon)

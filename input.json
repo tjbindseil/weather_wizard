@@ -54,6 +54,11 @@
             "name": "mammoth coffee roasters",
             "lat": 37.6401,
             "long": -118.9667
+        },
+        {
+            "name": "scenic loop",
+            "lat": 37.6754,
+            "long": -118.9887
         }
     ]
 }
