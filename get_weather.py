@@ -98,7 +98,13 @@ for k, v in metadata.items():
         time_periods.append(period['name'])
     break # break after one iteration, we just want the names of the periods
 
-def make_table(metadata, key, tableName):
+def icon_make_table_data(period, key):
+    return td(img(src=period[key]))
+
+def default_make_table_data(period, key):
+    return td(period[key])
+
+def make_table(metadata, key, tableName, make_table_data_func=default_make_table_data):
     with document(title=tableName) as doc_detailedForecast:
         h1(tableName)
         with table() as t:
@@ -117,13 +123,15 @@ def make_table(metadata, key, tableName):
                 # add detailedForecast for each time period
                 with r_curr:
                     for period in v.forecast['periods']:
-                        r_curr.add(td(period[key]))
+                        r_curr.add(td(make_table_data_func(period, key)))
                 t.add(r_curr)
 
-    with open('forecast_detailed.html', 'w') as f:
+    with open(tableName + '.html', 'w') as f:
         f.write(doc_detailedForecast.render())
 
 make_table(metadata, 'detailedForecast', 'DetailedForecast')
+make_table(metadata, 'icon', 'IconForecast', icon_make_table_data)
+make_table(metadata, 'shortForecast', 'ShortForecast')
 
 # # add row with icon to see what it looks like
 # r_icon = tr()
