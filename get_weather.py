@@ -38,6 +38,7 @@ class LocationData:
             cleaned_forecast['elevation'] = full_forecast['properties']['elevation']
             cleaned_forecast['periods'] = []
             for period in full_forecast['properties']['periods']:
+                # TODO use a model object instantiated with the full_forecast dictionary resulting from the curl request
                 cleaned_period = {}
                 cleaned_period['name'] = period['name']
                 cleaned_period['temperature'] = period['temperature']
@@ -108,7 +109,6 @@ def make_table(metadata, key, tableName, make_table_data_func=default_make_table
     with document(title=tableName) as doc_detailedForecast:
         h1(tableName)
         with table() as t:
-            # header
             r_header = tr()
             with r_header:
                 r_header.add(th('Location Name'))
@@ -123,7 +123,7 @@ def make_table(metadata, key, tableName, make_table_data_func=default_make_table
                 # add detailedForecast for each time period
                 with r_curr:
                     for period in v.forecast['periods']:
-                        r_curr.add(td(make_table_data_func(period, key)))
+                        r_curr.add(make_table_data_func(period, key))
                 t.add(r_curr)
 
     with open(tableName + '.html', 'w') as f:
